@@ -28,7 +28,6 @@ async function getSubsController(req, res) {
 
 async function notifySubsController(req, res) {
   try {
-    console.log(`req.body`, req.body);
     await subscriberServices.notifySubs(req.body);
     return res.json({
       success: true,

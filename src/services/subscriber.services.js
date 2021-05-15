@@ -1,6 +1,7 @@
 const subscriberModel = require("../models/subscribers");
-
+const { push } = require("../config/push");
 async function createSubscriber(sub) {
+  console.log(sub);
   const subscriber = await subscriberModel.create(sub);
   push.sendNotification(
     subscriber.subscription,
@@ -14,7 +15,9 @@ async function createSubscriber(sub) {
 
 async function getSubscribers(username) {
   if (username) {
-    const subscriber = await subscriberModel.find({ username: "username" });
+    const subscriber = await subscriberModel.find({
+      username: "username",
+    });
     if (!subscriber) throw "Subscriber not found.";
     return subscriber;
   }
@@ -22,11 +25,12 @@ async function getSubscribers(username) {
 }
 
 async function notifySubscribers(notification) {
-  const subs = await getSubscribers();
-  console.log(`subs`, subs);
-  subs.forEach((sub) => {
+  const subs = await subscriberModel.find({});
+
+  subs.forEach(async (sub) => {
+    console.log(`subs`, { ...sub._doc });
     push.sendNotification(
-      sub.subscription,
+      { ...sub._doc },
       JSON.stringify({
         title: notification.title,
         body: notification.body,
