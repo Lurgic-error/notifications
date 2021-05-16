@@ -1,8 +1,16 @@
 const subscriberServices = require("../services/subscriber.services");
+const { push } = require("../config/push");
 
 async function createSubController(req, res) {
   try {
-    await subscriberServices.createSub(req.body);
+    const subscriber = await subscriberServices.createSub(req.body);
+    push.sendNotification(
+      subscriber.subscription,
+      JSON.stringify({
+        title: `Welcome ${subscriber.username}`,
+        body: "Successfully subscribed to Vandu Notifications.",
+      })
+    );
     res.json({
       message: "success",
     });
@@ -28,7 +36,16 @@ async function getSubsController(req, res) {
 
 async function notifySubsController(req, res) {
   try {
-    await subscriberServices.notifySubs(req.body);
+    const subs = await subscriberServices.notifySubs(req.body);
+    subs.forEach(async (sub) => {
+      push.sendNotification(
+        sub._doc.subscription,
+        JSON.stringify({
+          title: req.body.title,
+          body: req.body.body,
+        })
+      );
+    });
     return res.json({
       success: true,
     });
